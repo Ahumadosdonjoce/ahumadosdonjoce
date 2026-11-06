@@ -163,7 +163,7 @@
     }).join('');
     $('#drawerSummary').hidden = false;
     $('#checkoutSection').hidden = false;
-    $('#drawerSummary').innerHTML = `<div class="summary-line"><span>Productos en tu pedido</span><strong>${itemCount()}</strong></div><div class="summary-line"><span>Subtotal con precios disponibles</span><strong>${money(subtotal())}</strong></div>${hasPending() ? '<div class="summary-line"><span>Productos sin precio indicado</span><strong>Por confirmar</strong></div>' : ''}<div class="summary-line"><span>Delivery</span><strong>${getDeliveryMode() === 'Recojo' ? 'No aplica' : config.costoDelivery == null ? 'Por confirmar' : money(config.costoDelivery)}</strong></div><div class="summary-line summary-total"><span>${hasPending() || (getDeliveryMode() === 'Delivery' && config.costoDelivery == null) ? 'Total referencial' : 'Total'}</span><strong>${money(subtotal()+(getDeliveryMode() === 'Delivery' ? (Number(config.costoDelivery)||0) : 0))}${hasPending() || (getDeliveryMode() === 'Delivery' && config.costoDelivery == null) ? ' + pend.' : ''}</strong></div><div class="summary-note">${hasPending() || (getDeliveryMode() === 'Delivery' && config.costoDelivery == null) ? 'El total final será confirmado por el negocio según precios pendientes, disponibilidad y costo de envío.' : 'Importe calculado según los precios registrados.'}</div>`;
+    $('#drawerSummary').innerHTML = `<div class="summary-line"><span>Productos en tu pedido</span><strong>${itemCount()}</strong></div><div class="summary-line"><span>Subtotal con precios disponibles</span><strong>${money(subtotal())}</strong></div>${hasPending() ? '<div class="summary-line"><span>Productos sin precio indicado</span><strong>Por confirmar</strong></div>' : ''}<div class="summary-line"><span>Delivery</span><strong>${getDeliveryMode() === 'Recojo' ? 'No aplica' : config.costoDelivery == null ? 'Por confirmar' : money(config.costoDelivery)}</strong></div><div class="summary-line summary-total"><span>${hasPending() || (getDeliveryMode() === 'Delivery' && config.costoDelivery == null) ? 'Total referencial' : 'Total'}</span><strong>${money(subtotal()+(getDeliveryMode() === 'Delivery' ? (Number(config.costoDelivery)||0) : 0))}</strong></div><div class="summary-note">${hasPending() || (getDeliveryMode() === 'Delivery' && config.costoDelivery == null) ? 'El total final será confirmado por el negocio según precios pendientes, disponibilidad y costo de envío.' : 'Importe calculado según los precios registrados.'}</div>`;
     $('#setupWarning').hidden = isWhatsAppConfigured();
   }
   $('#cartItems').addEventListener('click', event => {
@@ -303,7 +303,7 @@
   $$('[data-close]').forEach(button => button.addEventListener('click',closeDialog));
   $('#overlay').addEventListener('click',closeDialog);
   $('#confirmOrderBtn').addEventListener('click', () => openDialog('cart'));
-  $('#continueShoppingBtn').addEventListener('click', () => { closeDialog(); scrollToCatalog(); });
+  $('#continueShoppingBtn').addEventListener('click', closeDialog);
   document.addEventListener('keydown', event => {
     if (event.key === 'Escape' && activeDialog) closeDialog();
     if (event.key !== 'Tab' || !activeDialog) return;
