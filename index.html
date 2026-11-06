@@ -14,6 +14,24 @@
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="css/estilos.css">
   <title>Ahumados Don Jocé | Sabor de tu selva</title>
+  <!-- Ajuste exclusivo del logo oficial: encabezado y pie de página -->
+  <style>
+    .logo-oficial {display:block;width:116px;height:94px;object-fit:contain;object-position:center}
+    .site-header .header-inner {height:100px}
+    .footer-brand.logo-en-pie {background:#fff9ef;padding:8px 15px;border-radius:16px;display:inline-flex}
+    .footer-brand .logo-oficial {width:136px;height:112px}
+    .footer-top p {margin-left:0;margin-top:10px}
+    @media (max-width:820px) {
+      .site-header .header-inner {height:84px}
+      .site-header .logo-oficial {width:96px;height:76px}
+    }
+    @media (max-width:520px) {
+      .site-header .header-inner {height:79px}
+      .site-header .logo-oficial {width:86px;height:70px}
+      .footer-brand .logo-oficial {width:116px;height:98px}
+    }
+  </style>
+
 </head>
 <body>
   <!-- Iconos SVG locales: funcionan sin librerías de iconos externas -->
@@ -42,8 +60,7 @@
   <header class="site-header" id="inicio">
     <div class="shell header-inner">
       <a class="brand" href="#inicio" aria-label="Ir al inicio de Ahumados Don Jocé">
-        <span class="brand-mark" aria-hidden="true"><svg class="ic"><use href="#i-fire"/></svg></span>
-        <span class="brand-copy"><span>AHUMADOS</span><strong>DON JOCÉ</strong></span>
+        <img class="logo-oficial" src="img/logo/logo-transparente.png?v=2" alt="Ahumados Don Jocé — Sabor de tu selva" width="116" height="94" fetchpriority="high">
       </a>
       <nav class="main-nav" aria-label="Navegación principal"><a class="nav-link current" href="#inicio">Inicio</a><a class="nav-link" href="#productos">Productos</a><a class="nav-link" href="#nosotros">Nuestra esencia</a><a class="nav-link" href="#siguenos">Síguenos</a></nav>
       <button class="header-cart" type="button" data-open-cart aria-label="Abrir carrito"><svg class="ic"><use href="#i-cart"/></svg><span class="header-cart-label">Mi pedido</span><span class="cart-count" id="navCount">0</span></button>
@@ -62,17 +79,14 @@
           <div class="hero-highlights"><span><svg class="ic"><use href="#i-leaf"/></svg> Inspiración amazónica</span><span><svg class="ic"><use href="#i-fire"/></svg> Sabor ahumado</span></div>
         </div>
         <div class="hero-media reveal delay-1">
-          <div class="hero-photo-ring"></div><div class="hero-logo-plaque"><img src="img/logo/logo-transparente.png" alt="Logo original Ahumados Don Jocé, sabor de tu selva" width="180" height="152"></div>
+          <div class="hero-photo-ring"></div>
           <div class="hero-image-frame" id="heroSlide"><img id="heroImage" src="img/productos/p01.webp" alt="Cecina roja, fotografía referencial" width="510" height="340"><div class="hero-image-scrim"></div><div class="hero-image-text"><span>LOS SABORES QUE AMAMOS</span><strong id="heroProductName">Cecina roja</strong></div></div>
-          <div class="hero-float hero-float-top"><span class="float-icon"><svg class="ic"><use href="#i-leaf"/></svg></span><span><small>Descubre lo auténtico</small><strong>Sabor regional</strong></span></div>
           <div class="hero-float hero-float-bottom"><span class="float-mini">✦</span><span>Hecho para compartir</span></div>
           <div class="hero-slider-actions"><button class="round-arrow" id="slidePrev" type="button" aria-label="Producto anterior">‹</button><div class="slider-dots" id="sliderDots" role="group" aria-label="Seleccionar imagen destacada"></div><button class="round-arrow" id="slideNext" type="button" aria-label="Producto siguiente">›</button></div>
         </div>
       </div>
       <div class="hero-bottom-line" aria-hidden="true"></div>
     </section>
-
-    <section class="ribbon" aria-label="Características"><div class="shell ribbon-inner"><div><svg class="ic"><use href="#i-fire"/></svg><span>El inconfundible <strong>toque ahumado</strong></span></div><span class="ribbon-sep"></span><div><svg class="ic"><use href="#i-heart"/></svg><span>Sabores para <strong>compartir</strong></span></div><span class="ribbon-sep"></span><div><svg class="ic"><use href="#i-truck"/></svg><span>Consulta por <strong>delivery</strong></span></div></div></section>
 
     <section class="catalog-section" id="productos">
       <div class="shell">
@@ -88,7 +102,7 @@
     <section class="social-section" id="siguenos"><div class="shell social-card reveal"><div class="social-glow"></div><div class="social-decoration">✦</div><div class="social-content"><span class="eyebrow on-dark">NO TE PIERDAS NADA</span><h2>¡Síguenos para más <em>promociones!</em></h2><p>Entérate de nuestras novedades y comparte tu amor por el sabor de la selva.</p><div class="social-icons"><a id="instagramLink" href="https://www.instagram.com/" target="_blank" rel="noopener noreferrer" aria-label="Abrir Instagram"><svg class="ic"><use href="#i-instagram"/></svg><span>Instagram</span></a><a id="facebookLink" href="https://www.facebook.com/" target="_blank" rel="noopener noreferrer" aria-label="Abrir Facebook"><svg class="ic"><use href="#i-facebook"/></svg><span>Facebook</span></a><a id="tiktokLink" href="https://www.tiktok.com/" target="_blank" rel="noopener noreferrer" aria-label="Abrir TikTok"><svg class="ic"><use href="#i-tiktok"/></svg><span>TikTok</span></a></div></div><div class="social-photo-stack" aria-hidden="true"><img loading="lazy" src="img/productos/p05.webp" alt=""><img loading="lazy" src="img/productos/p01.webp" alt=""></div></div></section>
   </main>
 
-  <footer class="footer"><div class="shell"><div class="footer-top"><div><a class="brand footer-brand" href="#inicio"><span class="brand-mark"><svg class="ic"><use href="#i-fire"/></svg></span><span class="brand-copy"><span>AHUMADOS</span><strong>DON JOCÉ</strong></span></a><p>El sabor de tu selva.</p></div><div class="footer-menu"><a href="#inicio">Inicio</a><a href="#productos">Productos</a><a href="#nosotros">Nuestra esencia</a><a href="#siguenos">Síguenos</a></div></div><div class="footer-bottom"><span>© <span id="year"></span> Ahumados Don Jocé.</span><span>Web hecha por <strong>Agencia Blink</strong> <span class="blink-bolt" aria-hidden="true">✦</span></span></div></div></footer>
+  <footer class="footer"><div class="shell"><div class="footer-top"><div><a class="brand footer-brand logo-en-pie" href="#inicio" aria-label="Ir al inicio"><img class="logo-oficial" src="img/logo/logo-transparente.png?v=2" alt="Ahumados Don Jocé" width="136" height="112" loading="lazy"></a><p>El sabor de tu selva.</p></div><div class="footer-menu"><a href="#inicio">Inicio</a><a href="#productos">Productos</a><a href="#nosotros">Nuestra esencia</a><a href="#siguenos">Síguenos</a></div></div><div class="footer-bottom"><span>© <span id="year"></span> Ahumados Don Jocé.</span><span>Web hecha por <strong>Agencia Blink</strong> <span class="blink-bolt" aria-hidden="true">✦</span></span></div></div></footer>
 
   <button class="floating-cart" id="floatingCart" type="button" data-open-cart aria-label="Abrir tu pedido"><svg class="ic"><use href="#i-cart"/></svg><span id="floatingCount">0</span></button>
 
@@ -120,6 +134,6 @@
   <div class="toast" id="toast" role="status" aria-live="polite"></div>
   <script src="datos/config.js"></script>
   <script src="datos/productos.js"></script>
-  <script src="js/app.js" defer></script>
+  <script src="js/app.js?v=3" defer></script>
 </body>
 </html>
