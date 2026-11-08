@@ -21,6 +21,8 @@
   let activeDialog = null;
   let activeProduct = null;
   let detailQty = 1;
+  let purchaseMode = 'menor';
+  const lineProduct = line => { const product = findProduct(line.id); return {...product, precio: line.modo === 'mayor' ? null : product.precio}; };
   let slideIndex = 0;
   let toastTimer;
   let focusBeforeDialog;
@@ -32,15 +34,15 @@
       const data = JSON.parse(localStorage.getItem(cartKey) || '[]');
       if (!Array.isArray(data)) return [];
       return data.filter(line => line && typeof line.id === 'string' && findProduct(line.id))
-        .map(line => ({id: line.id, qty: Math.max(1, Math.min(99, Number(line.qty) || 1)), nota: String(line.nota || '').slice(0,150)}));
+        .map(line => ({id: line.id, qty: Math.max(1, Math.min(99, Math.trunc(Number(line.qty)) || 1)), modo: line.modo === 'mayor' ? 'mayor' : 'menor', nota: String(line.nota || '').slice(0,150)}));
     } catch (_) { return []; }
   }
   function saveCart() {
     try { localStorage.setItem(cartKey, JSON.stringify(cart)); } catch (_) { /* Navegador con almacenamiento deshabilitado: carrito en memoria */ }
   }
   function itemCount() { return cart.reduce((sum, item) => sum + item.qty, 0); }
-  function subtotal() { return cart.reduce((sum, item) => sum + (findProduct(item.id)?.precio ?? 0) * item.qty, 0); }
-  function hasPending() { return cart.some(item => findProduct(item.id)?.precio == null); }
+  function subtotal() { return cart.reduce((sum, item) => sum + (lineProduct(item)?.precio ?? 0) * item.qty, 0); }
+  function hasPending() { return cart.some(item => lineProduct(item)?.precio == null); }
   function escapeAttr(text) { return sanitize(text); }
   function toast(text) {
     const el = $('#toast');
@@ -64,7 +66,7 @@
           <span class="product-tag ${item.precio == null ? 'pending' : ''}">${escapeAttr(item.etiqueta)}</span>
           <button class="view-product" type="button" data-detail="${escapeAttr(item.id)}" aria-label="Ver detalles de ${escapeAttr(item.nombre)}">Ver detalle +</button>
         </div>
-        <div class="product-body"><span class="product-category">${escapeAttr(item.categoria)}</span><h3>${escapeAttr(item.nombre)}</h3><p class="product-desc">${escapeAttr(item.descripcion)}</p><div class="product-price ${item.precio == null ? 'pending' : ''}">${item.precio == null ? 'Precio por consultar' : money(item.precio)}</div>
+        <div class="product-body"><span class="product-category">${escapeAttr(item.categoria)}</span><h3>${escapeAttr(item.nombre)}</h3><p class="product-desc">${escapeAttr(item.descripcion)}</p><div class="product-price ${item.precio == null ? 'pending' : ''}">${item.precio == null ? 'Por menor: consultar' : 'Por menor: '+money(item.precio)}</div><button type="button" class="wholesale-hint" data-wholesale="${escapeAttr(item.id)}">Precio al por mayor · Consultar precio</button>
           <div class="product-foot"><div class="qty-control"><button type="button" data-less="${escapeAttr(item.id)}" aria-label="Restar cantidad de ${escapeAttr(item.nombre)}">${icon('minus')}</button><output aria-label="Cantidad" data-quantity="${escapeAttr(item.id)}">${cardQuantities[item.id] || 1}</output><button type="button" data-more="${escapeAttr(item.id)}" aria-label="Aumentar cantidad de ${escapeAttr(item.nombre)}">${icon('plus')}</button></div><button class="add-card" type="button" data-add="${escapeAttr(item.id)}">${icon('cart')} Agregar</button></div>
         </div>
       </article>`).join('') : '<div class="empty-search"><strong>Sin resultados por aquí.</strong>Prueba con otra palabra o selecciona otra categoría.</div>';
@@ -74,12 +76,12 @@
     const output = $$('[data-quantity]').find(node => node.dataset.quantity === id);
     if (output) output.textContent = cardQuantities[id];
   }
-  function addToCart(id, qty = 1, note = '') {
+  function addToCart(id, qty = 1, note = '', mode = 'menor') {
     if (!findProduct(id)) return;
     const cleanNote = String(note || '').trim().slice(0,150);
-    const existing = cart.find(line => line.id === id && line.nota === cleanNote);
+    const existing = cart.find(line => line.id === id && line.nota === cleanNote && (line.modo || 'menor') === mode);
     if (existing) existing.qty = Math.min(99, existing.qty + qty);
-    else cart.push({id, qty: Math.max(1, Math.min(99,qty)), nota: cleanNote});
+    else cart.push({id, modo: mode, qty: Math.max(1, Math.min(99,qty)), nota: cleanNote});
     saveCart(); renderCart();
     $('#addedName').textContent = findProduct(id).nombre;
     $('#floatingCart').classList.remove('pulse');
@@ -92,9 +94,11 @@
     const more = event.target.closest('[data-more]');
     const add = event.target.closest('[data-add]');
     const detail = event.target.closest('[data-detail]');
+    const wholesale = event.target.closest('[data-wholesale]');
     if (less) changeCardQty(less.dataset.less, -1);
     else if (more) changeCardQty(more.dataset.more, 1);
-    else if (add) addToCart(add.dataset.add, cardQuantities[add.dataset.add] || 1);
+    else if (add) showProduct(add.dataset.add, cardQuantities[add.dataset.add] || 1);
+    else if (wholesale) showProduct(wholesale.dataset.wholesale, cardQuantities[wholesale.dataset.wholesale] || 1, 'mayor');
     else if (detail) showProduct(detail.dataset.detail);
   });
   $('#productGrid').addEventListener('keydown', event => {
@@ -113,25 +117,34 @@
   $('#catalogSearch').addEventListener('input', event => { search = event.target.value.trim(); renderProducts(); });
 
   // DETALLES DE PRODUCTO
-  function showProduct(id) {
+  function showProduct(id, initialQty = 1, mode = 'menor') {
     const product = findProduct(id);
     if (!product) return;
     activeProduct = product;
-    detailQty = 1;
+    detailQty = initialQty;
+    purchaseMode = mode;
+    $$('input[name="purchaseMode"]').forEach(input => { input.checked = input.value === mode; });
     $('#detailImage').src = product.imagen;
     $('#detailImage').alt = `Imagen referencial de ${product.nombre}`;
     $('#detailCategory').textContent = product.categoria.toUpperCase();
     $('#detailName').textContent = product.nombre;
     $('#detailDescription').textContent = product.descripcion;
-    $('#detailPrice').textContent = product.precio == null ? 'Precio por consultar' : money(product.precio);
-    $('#detailPrice').classList.toggle('pending', product.precio == null);
+    $('#detailPrice').textContent = mode === 'mayor' ? 'Precio al por mayor: consultar precio' : product.precio == null ? 'Precio por menor: consultar' : `Precio por menor: ${money(product.precio)}`;
+    $('#detailPrice').classList.toggle('pending', mode === 'mayor' || product.precio == null);
     $('#detailNote').value = '';
     $('#detailQuantity').textContent = detailQty;
     openDialog('product');
   }
   $('#detailMinus').addEventListener('click', () => { detailQty = Math.max(1, detailQty-1); $('#detailQuantity').textContent = detailQty; });
   $('#detailPlus').addEventListener('click', () => { detailQty = Math.min(99, detailQty+1); $('#detailQuantity').textContent = detailQty; });
-  $('#detailAdd').addEventListener('click', () => { if (activeProduct) addToCart(activeProduct.id, detailQty, $('#detailNote').value); });
+  $('#detailAdd').addEventListener('click', () => { if (activeProduct) addToCart(activeProduct.id, detailQty, $('#detailNote').value, purchaseMode); });
+
+  $$('input[name="purchaseMode"]').forEach(input => input.addEventListener('change', () => {
+    purchaseMode = input.value;
+    const pending = purchaseMode === 'mayor' || activeProduct.precio == null;
+    $('#detailPrice').textContent = purchaseMode === 'mayor' ? 'Precio al por mayor: consultar precio' : activeProduct.precio == null ? 'Precio por menor: consultar' : `Precio por menor: ${money(activeProduct.precio)}`;
+    $('#detailPrice').classList.toggle('pending', pending);
+  }));
 
   // CARRITO Y RESUMEN
   function updateCounts() {
@@ -158,8 +171,8 @@
       return;
     }
     items.innerHTML = cart.map((line,index) => {
-      const product = findProduct(line.id);
-      return `<article class="cart-item"><img src="${escapeAttr(product.imagen)}" alt="${escapeAttr(product.nombre)}"><div class="cart-item-info"><strong>${escapeAttr(product.nombre)}</strong><span class="line-price ${product.precio == null ? 'pending':''}">${product.precio == null ? 'Precio por confirmar' : money(product.precio * line.qty)}</span>${line.nota ? `<small>Nota: ${sanitize(line.nota)}</small>` : ''}<div class="cart-quantity"><button type="button" data-cart-less="${index}" aria-label="Restar uno">${icon('minus')}</button><output>${line.qty}</output><button type="button" data-cart-more="${index}" aria-label="Sumar uno">${icon('plus')}</button></div></div><button class="remove-item" type="button" data-cart-remove="${index}" aria-label="Eliminar ${escapeAttr(product.nombre)}">${icon('trash')}</button></article>`;
+      const product = lineProduct(line);
+      return `<article class="cart-item"><img src="${escapeAttr(product.imagen)}" alt="${escapeAttr(product.nombre)}"><div class="cart-item-info"><strong>${escapeAttr(product.nombre)}</strong><small>${line.modo === 'mayor' ? 'Por mayor · Consultar precio' : 'Por menor'}</small><span class="line-price ${product.precio == null ? 'pending':''}">${product.precio == null ? 'Precio por confirmar' : money(product.precio * line.qty)}</span>${line.nota ? `<small>Nota: ${sanitize(line.nota)}</small>` : ''}<div class="cart-quantity"><button type="button" data-cart-less="${index}" aria-label="Restar uno">${icon('minus')}</button><output>${line.qty}</output><button type="button" data-cart-more="${index}" aria-label="Sumar uno">${icon('plus')}</button></div></div><button class="remove-item" type="button" data-cart-remove="${index}" aria-label="Eliminar ${escapeAttr(product.nombre)}">${icon('trash')}</button></article>`;
     }).join('');
     $('#drawerSummary').hidden = false;
     $('#checkoutSection').hidden = false;
@@ -220,8 +233,8 @@
       '🧺 *DETALLE DEL PEDIDO*'
     ];
     cart.forEach((line,index) => {
-      const product = findProduct(line.id);
-      lines.push(`${index+1}. ${line.qty} × ${product.nombre} — ${product.precio == null ? 'Precio por confirmar' : money(product.precio * line.qty)}`);
+      const product = lineProduct(line);
+      lines.push(`${index+1}. ${line.qty} × ${product.nombre} (${line.modo === 'mayor' ? 'POR MAYOR — consultar precio' : 'por menor'}) — ${product.precio == null ? 'Precio por confirmar' : money(product.precio * line.qty)}`);
       if (product.precio != null) lines.push(`   Precio por unidad: ${money(product.precio)}`);
       if (line.nota) lines.push(`   • Indicación: ${line.nota}`);
     });
@@ -344,6 +357,7 @@
   $('#facebookLink').href = config.redes?.facebook || 'https://www.facebook.com/';
   $('#tiktokLink').href = config.redes?.tiktok || 'https://www.tiktok.com/';
   $('#year').textContent = new Date().getFullYear();
+  $('#productCount').textContent = products.length;
   renderProducts();
   renderCart();
   updateChoiceStyles('paymentChoices');
