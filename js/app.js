@@ -66,8 +66,8 @@
           <span class="product-tag ${item.precio == null ? 'pending' : ''}">${escapeAttr(item.etiqueta)}</span>
           <button class="view-product" type="button" data-detail="${escapeAttr(item.id)}" aria-label="Ver detalles de ${escapeAttr(item.nombre)}">Ver detalle +</button>
         </div>
-        <div class="product-body"><span class="product-category">${escapeAttr(item.categoria)}</span><h3>${escapeAttr(item.nombre)}</h3><p class="product-desc">${escapeAttr(item.descripcion)}</p><div class="product-price ${item.precio == null ? 'pending' : ''}">${item.precio == null ? 'Por menor: consultar' : 'Por menor: '+money(item.precio)}</div><button type="button" class="wholesale-hint" data-wholesale="${escapeAttr(item.id)}">Precio al por mayor · Consultar precio</button>
-          <div class="product-foot"><div class="qty-control"><button type="button" data-less="${escapeAttr(item.id)}" aria-label="Restar cantidad de ${escapeAttr(item.nombre)}">${icon('minus')}</button><output aria-label="Cantidad" data-quantity="${escapeAttr(item.id)}">${cardQuantities[item.id] || 1}</output><button type="button" data-more="${escapeAttr(item.id)}" aria-label="Aumentar cantidad de ${escapeAttr(item.nombre)}">${icon('plus')}</button></div><button class="add-card" type="button" data-add="${escapeAttr(item.id)}">${icon('cart')} Agregar</button></div>
+        <div class="product-body"><span class="product-category">${escapeAttr(item.categoria)}</span><h3>${escapeAttr(item.nombre)}</h3><p class="product-desc">${escapeAttr(item.descripcion)}</p><div class="product-price ${item.precio == null ? 'pending' : ''}">${item.precio == null ? 'Por kilo: A consultar' : 'Por kilo: '+money(item.precio)+' / kg'}</div><button type="button" class="wholesale-hint" data-wholesale="${escapeAttr(item.id)}">Comprar al por mayor · A consultar</button>
+          <div class="product-foot"><div class="qty-control"><button type="button" data-less="${escapeAttr(item.id)}" aria-label="Restar kilos de ${escapeAttr(item.nombre)}">${icon('minus')}</button><output aria-label="Cantidad en kilos" data-quantity="${escapeAttr(item.id)}">${cardQuantities[item.id] || 1}</output><button type="button" data-more="${escapeAttr(item.id)}" aria-label="Aumentar kilos de ${escapeAttr(item.nombre)}">${icon('plus')}</button></div><button class="add-card" type="button" data-add="${escapeAttr(item.id)}">${icon('cart')} Agregar</button></div>
         </div>
       </article>`).join('') : '<div class="empty-search"><strong>Sin resultados por aquí.</strong>Prueba con otra palabra o selecciona otra categoría.</div>';
   }
@@ -129,20 +129,20 @@
     $('#detailCategory').textContent = product.categoria.toUpperCase();
     $('#detailName').textContent = product.nombre;
     $('#detailDescription').textContent = product.descripcion;
-    $('#detailPrice').textContent = mode === 'mayor' ? 'Precio al por mayor: consultar precio' : product.precio == null ? 'Precio por menor: consultar' : `Precio por menor: ${money(product.precio)}`;
+    $('#detailPrice').textContent = mode === 'mayor' ? 'Precio al por mayor: A consultar / kg' : product.precio == null ? 'Precio por kilo: A consultar' : `Precio por kilo: ${money(product.precio)} / kg`;
     $('#detailPrice').classList.toggle('pending', mode === 'mayor' || product.precio == null);
     $('#detailNote').value = '';
-    $('#detailQuantity').textContent = detailQty;
+    $('#detailQuantity').textContent = detailQty + ' kg';
     openDialog('product');
   }
-  $('#detailMinus').addEventListener('click', () => { detailQty = Math.max(1, detailQty-1); $('#detailQuantity').textContent = detailQty; });
-  $('#detailPlus').addEventListener('click', () => { detailQty = Math.min(99, detailQty+1); $('#detailQuantity').textContent = detailQty; });
+  $('#detailMinus').addEventListener('click', () => { detailQty = Math.max(1, detailQty-1); $('#detailQuantity').textContent = detailQty + ' kg'; });
+  $('#detailPlus').addEventListener('click', () => { detailQty = Math.min(99, detailQty+1); $('#detailQuantity').textContent = detailQty + ' kg'; });
   $('#detailAdd').addEventListener('click', () => { if (activeProduct) addToCart(activeProduct.id, detailQty, $('#detailNote').value, purchaseMode); });
 
   $$('input[name="purchaseMode"]').forEach(input => input.addEventListener('change', () => {
     purchaseMode = input.value;
     const pending = purchaseMode === 'mayor' || activeProduct.precio == null;
-    $('#detailPrice').textContent = purchaseMode === 'mayor' ? 'Precio al por mayor: consultar precio' : activeProduct.precio == null ? 'Precio por menor: consultar' : `Precio por menor: ${money(activeProduct.precio)}`;
+    $('#detailPrice').textContent = purchaseMode === 'mayor' ? 'Precio al por mayor: A consultar / kg' : activeProduct.precio == null ? 'Precio por kilo: A consultar' : `Precio por kilo: ${money(activeProduct.precio)} / kg`;
     $('#detailPrice').classList.toggle('pending', pending);
   }));
 
@@ -172,11 +172,11 @@
     }
     items.innerHTML = cart.map((line,index) => {
       const product = lineProduct(line);
-      return `<article class="cart-item"><img src="${escapeAttr(product.imagen)}" alt="${escapeAttr(product.nombre)}"><div class="cart-item-info"><strong>${escapeAttr(product.nombre)}</strong><small>${line.modo === 'mayor' ? 'Por mayor · Consultar precio' : 'Por menor'}</small><span class="line-price ${product.precio == null ? 'pending':''}">${product.precio == null ? 'Precio por confirmar' : money(product.precio * line.qty)}</span>${line.nota ? `<small>Nota: ${sanitize(line.nota)}</small>` : ''}<div class="cart-quantity"><button type="button" data-cart-less="${index}" aria-label="Restar uno">${icon('minus')}</button><output>${line.qty}</output><button type="button" data-cart-more="${index}" aria-label="Sumar uno">${icon('plus')}</button></div></div><button class="remove-item" type="button" data-cart-remove="${index}" aria-label="Eliminar ${escapeAttr(product.nombre)}">${icon('trash')}</button></article>`;
+      return `<article class="cart-item"><img src="${escapeAttr(product.imagen)}" alt="${escapeAttr(product.nombre)}"><div class="cart-item-info"><strong>${escapeAttr(product.nombre)}</strong><small>${line.modo === 'mayor' ? 'Por mayor · A consultar / kg' : 'Por menor · Por kilo'}</small><span class="line-price ${product.precio == null ? 'pending':''}">${product.precio == null ? 'A consultar / kg' : money(product.precio * line.qty)}</span>${line.nota ? `<small>Nota: ${sanitize(line.nota)}</small>` : ''}<div class="cart-quantity"><button type="button" data-cart-less="${index}" aria-label="Restar uno">${icon('minus')}</button><output>${line.qty} kg</output><button type="button" data-cart-more="${index}" aria-label="Sumar uno">${icon('plus')}</button></div></div><button class="remove-item" type="button" data-cart-remove="${index}" aria-label="Eliminar ${escapeAttr(product.nombre)}">${icon('trash')}</button></article>`;
     }).join('');
     $('#drawerSummary').hidden = false;
     $('#checkoutSection').hidden = false;
-    $('#drawerSummary').innerHTML = `<div class="summary-line"><span>Productos en tu pedido</span><strong>${itemCount()}</strong></div><div class="summary-line"><span>Subtotal con precios disponibles</span><strong>${money(subtotal())}</strong></div>${hasPending() ? '<div class="summary-line"><span>Productos sin precio indicado</span><strong>Por confirmar</strong></div>' : ''}<div class="summary-line"><span>Delivery</span><strong>${getDeliveryMode() === 'Recojo' ? 'No aplica' : config.costoDelivery == null ? 'Por confirmar' : money(config.costoDelivery)}</strong></div><div class="summary-line summary-total"><span>${hasPending() || (getDeliveryMode() === 'Delivery' && config.costoDelivery == null) ? 'Total referencial' : 'Total'}</span><strong>${money(subtotal()+(getDeliveryMode() === 'Delivery' ? (Number(config.costoDelivery)||0) : 0))}</strong></div><div class="summary-note">${hasPending() || (getDeliveryMode() === 'Delivery' && config.costoDelivery == null) ? 'El total final será confirmado por el negocio según precios pendientes, disponibilidad y costo de envío.' : 'Importe calculado según los precios registrados.'}</div>`;
+    $('#drawerSummary').innerHTML = `<div class="summary-line"><span>Kilos en tu pedido</span><strong>${itemCount()}</strong></div><div class="summary-line"><span>Subtotal con precios disponibles</span><strong>${money(subtotal())}</strong></div>${hasPending() ? '<div class="summary-line"><span>Productos sin precio indicado</span><strong>Por confirmar</strong></div>' : ''}<div class="summary-line"><span>Delivery</span><strong>${getDeliveryMode() === 'Recojo' ? 'No aplica' : config.costoDelivery == null ? 'Por confirmar' : money(config.costoDelivery)}</strong></div><div class="summary-line summary-total"><span>${hasPending() || (getDeliveryMode() === 'Delivery' && config.costoDelivery == null) ? 'Total referencial' : 'Total'}</span><strong>${money(subtotal()+(getDeliveryMode() === 'Delivery' ? (Number(config.costoDelivery)||0) : 0))}</strong></div><div class="summary-note">${hasPending() || (getDeliveryMode() === 'Delivery' && config.costoDelivery == null) ? 'El total final será confirmado por el negocio según precios pendientes, disponibilidad y costo de envío.' : 'Importe calculado según los precios registrados.'}</div>`;
     $('#setupWarning').hidden = isWhatsAppConfigured();
   }
   $('#cartItems').addEventListener('click', event => {
@@ -234,8 +234,8 @@
     ];
     cart.forEach((line,index) => {
       const product = lineProduct(line);
-      lines.push(`${index+1}. ${line.qty} × ${product.nombre} (${line.modo === 'mayor' ? 'POR MAYOR — consultar precio' : 'por menor'}) — ${product.precio == null ? 'Precio por confirmar' : money(product.precio * line.qty)}`);
-      if (product.precio != null) lines.push(`   Precio por unidad: ${money(product.precio)}`);
+      lines.push(`${index+1}. ${line.qty} kg × ${product.nombre} (${line.modo === 'mayor' ? 'POR MAYOR — A consultar / kg' : 'por menor'}) — ${product.precio == null ? 'A consultar / kg' : money(product.precio * line.qty)}`);
+      if (product.precio != null) lines.push(`   Precio por kilo: ${money(product.precio)} / kg`);
       if (line.nota) lines.push(`   • Indicación: ${line.nota}`);
     });
     lines.push('',`💰 *Subtotal conocido:* ${money(subtotal())}`);
